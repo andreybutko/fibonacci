@@ -1,0 +1,20 @@
+﻿syntax = "proto3";
+
+option go_package = "github.com/andreybutko/fibonacci/fibonacci";
+package fibonacci;
+
+// The fibonacci service definition.
+service Fibonacci {
+    // Sends a greeting
+    rpc GetSequence(FibonacciRequest) returns (stream FibonacciReply) {}
+  }
+
+
+// The fibonacci request message containing.
+message FibonacciRequest {
+  }
+
+// The response message containing sequence elements.
+message FibonacciReply {
+    int64 message = 1;
+  }
