@@ -1,7 +1,7 @@
 ﻿syntax = "proto3";
 
-option go_package = "github.com/andreybutko/fibonacci/fibonacci";
-package fibonacci;
+option go_package = "github.com/andreybutko/fibonacci/proto";
+package proto;
 
 // The fibonacci service definition.
 service Fibonacci {
