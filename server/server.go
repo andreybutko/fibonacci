@@ -1,22 +1,26 @@
-﻿package main
+package main
 
 import (
-	"github.com/andreybutko/fibonacci/proto"
-	"google.golang.org/grpc"
+	"fmt"
 	"log"
 	"net"
+
+	"github.com/andreybutko/fibonacci/proto"
+	"google.golang.org/grpc"
 )
 
+// FibonacciServer represents fivonacci server
 type FibonacciServer struct {
 	proto.UnimplementedFibonacciServer
 }
 
 const (
-	PORT = "9002"
+	port = "9002"
 )
 
+// GetSequence returns fibonacci sequence stream
 func (s *FibonacciServer) GetSequence(_ *proto.FibonacciRequest, stream proto.Fibonacci_GetSequenceServer) error {
-	for n := 0; n <= 6; n++ {
+	for n := 0; n <= 1000; n++ {
 		err := stream.Send(&proto.FibonacciReply{
 			Message: int64(n),
 		})
@@ -29,10 +33,13 @@ func (s *FibonacciServer) GetSequence(_ *proto.FibonacciRequest, stream proto.Fi
 }
 
 func main() {
+
+	fmt.Println("Server has started.")
+
 	server := grpc.NewServer()
 	proto.RegisterFibonacciServer(server, &FibonacciServer{})
 
-	lis, err := net.Listen("tcp", ":"+PORT)
+	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("net.Listen err: %v", err)
 	}
