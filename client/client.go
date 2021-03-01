@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -33,11 +34,14 @@ func main() {
 
 	stream, err := client.GetSequence(ctx, &pb.FibonacciRequest{})
 
-	// Skip data when buffer overflowed.
-	// TODO: How does it work? Is it awaits til buffer is freed?
 	ch := make(chan int64, 2)
 
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	go func() {
+		defer wg.Done()
+
 		for {
 			num, err := stream.Recv()
 
@@ -49,20 +53,33 @@ func main() {
 				log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
 			}
 
-			ch <- num.Message
+			select {
+			case ch <- num.Message:
+				fmt.Printf("Number recieved %v", num.Message)
+				break
+			default:
+			}
 		}
-		close(ch)
+	 close(ch)
 	}()
 
-	// TODO: Why it doesn't work for two goroutines? How to await them?
-	for {
-		time.Sleep(1 * time.Second)
+	go func() {
+		defer wg.Done()
 
-		num, ok := <-ch
+		for {
+			 time.Sleep(100 * time.Millisecond)
 
-		if !ok {
-			break
+			select {
+			case num, ok := <-ch:
+				if !ok {
+					log.Fatalln("Not OK")
+					return
+				}
+				fmt.Printf("%v\n", num)
+				break
+			}
 		}
-		fmt.Print(num)
-	}
+	}()
+
+	wg.Wait()
 }
